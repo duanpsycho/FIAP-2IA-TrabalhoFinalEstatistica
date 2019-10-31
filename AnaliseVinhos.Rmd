@@ -1,0 +1,623 @@
+---
+title: "Trabalho Final de Conceitos de Estatisticas pa IA - MBA em IA e ML"
+author: 'Autores: <br> Ariel Rodrigues Miranda <br> Duan Nunes Alves da Silva <br>
+  Jenifer Caroline Correa da Silva <br> Juliana Fatima dos Santos'
+date: "Outubro de 2018"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+### Instalação dos pacotes necessários para o desenvolvimento do trabalho  
+```{r message=FALSE}
+pacotes = c('psych', 'dplyr', 'plotly', 'gmodels','ggplot2','lattice','caret','rpart','corrgram','rpart.plot','latticeExtra','asbio','car','reprex')
+
+loadLibs = function (lista){
+  # Run through the list with libs names
+  for (x in lista){
+    # If not in require, then install the lib
+    if (!require(x, character.only = TRUE)){
+      install.packages(x, dependencies = TRUE) 
+      # Apply the value in require, for load the lib in R
+      sapply(x, library, character.only = TRUE)
+    } 
+  }
+}
+
+loadLibs(pacotes)
+
+```
+
+Mostrar até 2 casas decimais
+
+```{r}
+options("scipen" = 2)
+```
+Ler arquivo csv
+
+```{r}
+setwd('D:/Juliana/MBA IA and ML/6 - Estatistica')
+Vinhos <- read.csv2("BaseWine_Red_e_White2018.csv", row.names=1)
+fix(Vinhos)
+```
+Mostrar as variaveis
+
+```{r}
+str(Vinhos)
+```
+Mostra as variaveis
+
+```{r}
+names(Vinhos)
+```
+## Resposta
+### Frequência absoluta 
+Frequencia Absoluta é o número de vezes que uma determeniada variavel assume um determinado valor.  
+Nesse caso a nossa analise olha a qualidade do vinho que é uma variável qualitativa ordinal, isso é uma escala (3, 4, 5, 6, 7, 8, 9) e quantidade de vezes que o vinho vermelho e barnco aparecem para aquela qualidade.
+```{r}
+table(as.factor(Vinhos$quality), Vinhos$Vinho, useNA = "ifany")
+table(as.factor(Vinhos$quality), Vinhos$Vinho)
+```
+## Respostas
+### 2-Way Cross Tabulation
+Nessa tabela temos a relação dos vinhos Red e White com a qualidade, além de termos a quantidade de vezes que aquele vinho se repete (N) para aquela qualidade, temos o qui quadrado, N dividio pela quantidade total de linhas, N por colunas e N pelo total da tabela.  
+Na tabela abaixo podemos chegar a duas conclusões:  
+1-) utilizando o valor do qui quadrado, sendo que o maior é o da linha qualidade 5 e na coluna dos vinhos Red e o  fato do P valor ser menor que 5% (valor é de 2%) a probabilidade do vinho de qualidade 5 ser Red é muito grande.  
+2-) Os vinhos White porém são os que tem qualidade mais alta, pois é o que tem maior concentração nas pontuações mais alta de qualidade.
+
+```{r}
+CrossTable(as.factor(Vinhos$quality), Vinhos$Vinho) 
+summary(Vinhos)
+``` 
+
+id_vinho	= Id do vinho  
+fixedacidity = Acidez fixa Alguns ácidos, como o tartárico, o málico e o cítrico não são arrastados pelo vapor de água e constituem a acidez fixa.  
+volatileacidity	= Os ácidos voláteis são produzidos pelas reações químicas que ocorrem durante a maturação do vinho. A acidez volátil é um indicador da qualidade do vinho.  
+citricacid =	Presente nas uvas em baixa quantidade, nos vinhos o ácido cítrico tem pouca ou nenhuma presença. Nos vinhos tintos desaparece devido à ação de bactérias láticas (fermentação malolática). Sensorialmente é fresco, porém em alguns casos pode apresentar um leve final amargo.  
+residualsugar = O açúcar vai se transformando em álcool, ou seja, a fermentação vai ocorrendo, até determinado ponto em que o teor de álcool é mais alto do que as leveduras conseguem suportar, para viver. E aí elas morrem. O esse açúcar que resta, depois que o processo de fermentação já foi interrompido, e que vai permanecer no vinho, é chamado de açúcar residual.  
+chlorides = cloretos.  
+freesulfurdioxide = sulfóxido de sódio livre (conservante).  
+totalsulfurdioxide	= dióxido de enxofre total (conservante).  
+density = densidade do açucar para que ocorra a fermentação.  
+pH	= Nos vinhos em geral, o pH varia de 2,8 (acidez forte) até 3,8 (acidez leve). Com pH acima de 3,5 o vinho é frágil e pode estar sujeito a alterações (defeitos). Um pH baixo tem grande importância na estabilidade do vinho.  
+sulphates	alcohol	= Alcool sufatos.  
+quality = qualidade do vinho.  	
+Vinho = Tipo de vinho.
+
+```{r}
+mean(Vinhos$fixedacidity) # média
+
+median(Vinhos$fixedacidity) # médiana
+
+quantile(Vinhos$fixedacidity,type=4)  # Quartis
+
+quantile(Vinhos$fixedacidity,.65,type=4) # exato percentil
+
+range(Vinhos$fixedacidity)  # amplitude
+
+diff(range(Vinhos$fixedacidity)) #diferença entre o maior e o menor valor
+
+min(Vinhos$fixedacidity)  # valor mínimo de x
+
+max(Vinhos$fixedacidity)  # valor máximo de x
+
+var(Vinhos$fixedacidity) # para obter a variância
+
+sd(Vinhos$fixedacidity)  # para obter o desvio padrão
+
+CV_fixedacidity<-sd(Vinhos$fixedacidity)/mean(Vinhos$fixedacidity)*100  # para obter o coefiiente de variação
+CV_fixedacidity
+``` 
+
+Comando para gerar em 3 linhas e 4 colunas os histogramas.  
+
+Nos Histogramas podemos chegar algumas informações como a frequencia de açucar residual, isso mostra que a maioria dos vinhos tem pouco ou nenhum residuo pois isso mostra que a fermentação do vinho não ocorreu de forma correta e isso interfere na qualidade pois se tem residuo de açucar, torna o vinho mais pesado.
+
+```{r}
+par (mfrow=c(3,4))
+attach(Vinhos)
+hist(fixedacidity)
+hist(volatileacidity)
+hist(citricacid )
+hist(residualsugar)
+hist(chlorides)
+hist(freesulfurdioxide)
+hist(totalsulfurdioxide)
+hist(density)
+hist(pH)
+hist(sulphates)
+hist(alcohol)
+hist(quality)
+
+```
+Nesse histograma podemos ver como a densidade influencia na qualidade do vinho, pois a densidade esta relacionada com o açucar  logo se ela for muito alta, automaticamente vai ter preciptação de açucar que mexe com a qualidade do vinho.
+
+```{r}
+hist(quality, col=c("pink"), col.main="darkgray", prob=T)
+```
+
+Comando para gerar em 3 linhas e 4 colunas os histogramas
+```{r}
+par (mfrow=c(3,4))
+boxplot(fixedacidity, main='fixedacidity')
+boxplot(volatileacidity , main='volatileacidity')
+boxplot(citricacid , main='citricacid')
+boxplot(residualsugar, main='residualsugar')
+boxplot(chlorides, main='chlorides')
+boxplot(freesulfurdioxide, main='freesulfurdioxide')
+boxplot(totalsulfurdioxide, main='totalsulfurdioxide')
+boxplot(density, main='density')
+boxplot(pH, main='pH')
+boxplot(sulphates, main='sulphates')
+boxplot(alcohol, main='alcohol')
+boxplot(Vinhos$quality, main='quality')
+par (mfrow=c(1,1))
+```
+```{r}
+boxplot(quality ~ Vinho, main='quality')
+```
+
+## BOXPLOT DE COMPARAÇÃO ENTRE O VINHO RED E WHITE
+Qualidade: Ambos tem qualidade parecida.  
+Fixedacidity e pH: Como sabemos quanto mais fixedacity maior é o ph e isso se mostra verdade pois esses acidos não evaporam.
+
+```{r}
+
+boxplot(fixedacidity ~ Vinho, main='fixedacidity',col=c('red','blue'))
+boxplot(volatileacidity ~ Vinho , main='volatileacidity',col=c('red','blue'))
+boxplot(citricacid ~ Vinho, main='citricacid',col=c('red','blue'))
+boxplot(residualsugar ~ Vinho, main='residualsugar',col=c('red','blue'))
+boxplot(chlorides ~ Vinho, main='chlorides',col=c('red','blue'))
+boxplot(freesulfurdioxide ~ Vinho, main='freesulfurdioxide' ,col=c('red','blue'))
+boxplot(totalsulfurdioxide ~ Vinho, main='totalsulfurdioxide',col=c('red','blue'))
+boxplot(density ~ Vinho, main='density',col=c('red','blue'))
+boxplot(pH ~ Vinho, main='pH',col=c('red','blue'))
+boxplot(sulphates ~ Vinho, main='sulphates',col=c('red','blue'))
+boxplot(alcohol ~ Vinho, main='alcohol',col=c('red','blue'))
+par (mfrow=c(1,1))
+```
+## Gráfico de dispersão ( pch=caracter, lwd=largura)
+
+```{r}
+plot(freesulfurdioxide~totalsulfurdioxide)
+plot(freesulfurdioxide~totalsulfurdioxide, pch=1, lwd=3)
+
+plot(freesulfurdioxide~totalsulfurdioxide)
+abline(v=mean(freesulfurdioxide), col="red")
+abline(h=mean(totalsulfurdioxide), col="green")
+```
+
+Nesse Crosstable foi feito um crosstable entre os vinhos Red e White e o açucar residual dividido em quatro concentrações. O que podemos ver é que o vinho Red é onde eu tenho os vinhos com menor concentração de residuos de açucar.
+
+```{r}
+Vinhos$fx_redSugar <- cut(residualsugar,breaks=c(0,10,20,30,max(residualsugar)))  
+head(Vinhos$fx_redSugar, 10)
+str(Vinhos)
+CrossTable( Vinhos$fx_redSugar , Vinhos$Vinho) 
+```
+
+Nesse momento vamos analisar somente o vinho White pois, nele temos mais dados e com isso futuramente conseguimos fazer modelos mais acertivos.
+
+```{r}
+white <- subset(Vinhos, Vinho=="WHITE", select=c(quality,fixedacidity,volatileacidity,citricacid,residualsugar,
+                                                 chlorides,freesulfurdioxide,totalsulfurdioxide,density,pH,
+                                                 sulphates,alcohol))
+```
+## Estatísticas descritivas  
+Fazendo uma analise da base completa e com vinhos White, podemos ver que não vamos perder informações pois no summary os valores são bem parecidos e não corremos o risco de "influenciar" nossos futuros algoritimos de treino.
+
+```{r}
+summary(white)
+summary(Vinhos) 
+str(white)
+attach(white)
+```
+
+
+```{r}
+plot(freesulfurdioxide, totalsulfurdioxide)
+```
+## Estatísticas descritivas
+
+```{r}
+par (mfrow=c(3,4))
+boxplot(fixedacidity, main='fixedacidity')
+boxplot(volatileacidity , main='volatileacidity')
+boxplot(citricacid , main='citricacid')
+boxplot(residualsugar, main='residualsugar')
+boxplot(chlorides, main='chlorides')
+boxplot(freesulfurdioxide, main='freesulfurdioxide')
+boxplot(totalsulfurdioxide, main='totalsulfurdioxide')
+boxplot(density, main='density')
+boxplot(pH, main='pH')
+boxplot(sulphates, main='sulphates')
+boxplot(alcohol, main='alcohol')
+boxplot(quality, main='quality')
+par (mfrow=c(1,1))
+```
+
+
+```{r}
+boxplot.stats(white$residualsugar)
+boxplot.stats(white$density)
+boxplot.stats(white$volatileacidity)
+```
+
+## Normalização colocando os valores entre 0 e 1 da coluna de residualsugar
+
+```{r}
+
+quantile(residualsugar,.75,type=4)
+quantile(residualsugar,.25,type=2)
+
+AIQ_residualsugar<-quantile(residualsugar,.75,type=4)-quantile(residualsugar,.25,type=2) 
+AIQ_residualsugar
+limsup_residualsugar<- quantile(residualsugar,.75,type=4)+1.5*AIQ_residualsugar
+liminf_residualsugar<- quantile(residualsugar,.25,type=2)-1.5*AIQ_residualsugar
+limsup_residualsugar
+liminf_residualsugar
+```
+
+## Mudança na base
+
+```{r}
+white<-white %>% 
+      mutate(outl_sugar= if_else(residualsugar<liminf_residualsugar | residualsugar>limsup_residualsugar,1,0))
+table(white$outl_sugar)
+```
+
+Excluir outliers, pois como podemos ver no gráfico temos um único ponto acima de 40 e com isso ele pode influenciar o resultado
+
+```{r}
+white1<-subset(white, residualsugar<=40) 
+
+white1 <- subset(white, select=c(quality,fixedacidity,volatileacidity,citricacid,residualsugar,
+                                                 chlorides,freesulfurdioxide,totalsulfurdioxide,density,pH,
+                                                 sulphates,alcohol))
+summary(white1)
+```
+
+## matriz de correlações  
+Este grafico comprova todas as analises feitas acima.
+
+```{r}
+matcor <- round(cor(white1),3)
+print(matcor  )
+```
+
+```{r}
+corrgram(matcor, type = "cor", lower.panel = panel.shade, upper.panel = panel.pie)
+```
+
+```{r}
+corrplot::corrplot(matcor, method="circle", order="hclust")
+```
+
+```{r}
+panel.cor <- function(x, y, digits=2, prefix ="", cex.cor,
+                      ...)  {
+  usr <- par("usr")
+  on.exit(par(usr))
+  par(usr = c(0, 1, 0, 1))
+  r <- cor(x, y , use = "pairwise.complete.obs")
+  txt <- format(c(r, 0.123456789), digits = digits) [1]
+  txt <- paste(prefix, txt, sep = "")
+  if (missing(cex.cor))
+    cex <- 0.8/strwidth(txt)
+  # abs(r) Ã© para que na saÃ?da as correlaÃ§Ãµes ficam proporcionais
+  text(0.5, 0.5, txt, cex = cex * abs(r))
+}
+pairs(white1, lower.panel=panel.smooth, upper.panel=panel.cor)
+white2 <- subset(white1, select=c(-quality))
+
+```
+## Avaliar inicio  
+Aqui utilizamos uma função genérica cujo método padrão centraliza e / ou dimensiona as colunas de uma matriz numérica.
+```{r}
+vinhos_padroniz = as.data.frame(scale(white2))
+names(vinhos_padroniz)
+summary(vinhos_padroniz)
+```
+
+## Componentes Principais - Básico (PCA)
+O objetivo é encontrar combinações lineares das variáveis que incluam a maior quantidade possível de variância original.  
+Esta transformação é definida de forma que o primeiro componente principal tem a maior variância possível, e cada componente seguinte, por sua vez, tem a máxima variância sob a restrição de ser ortogonal a (i.e., não correlacionado com) os componentes anteriores.  
+Quanto maior a dimensão dos dados (número de variáveis) maior o risco de sobre ajuste do modelo.
+
+```{r}
+acpcor <- prcomp(vinhos_padroniz , scale = TRUE) 
+summary(acpcor)
+```
+
+
+```{r}
+plot(1:ncol(vinhos_padroniz ), acpcor$sdev^2, type = "b", xlab = "Componente",
+     ylab = "VariÃ¢ncia", pch = 20, cex.axis = 1.3, cex.lab = 1.3)
+```
+
+
+```{r}
+sum(acpcor$sdev^2)
+acpcor$rotation[, 1:11]
+print(acpcor$sdev[1:11] * t(acpcor$rotation[, 1:11]), digits = 3)
+```
+
+
+```{r}
+biplot(acpcor, xlab = "CP1", ylab = "CP2",cex.lab = 1.0, cex.axis = 1.0)
+```
+```{r}
+acpcor <- prcomp(vinhos_padroniz , scale = TRUE, retx = TRUE)
+escore1 <- acpcor$x[, 1]
+hist(escore1)
+```
+```{r}
+escore2 <- acpcor$x[, 2]
+par (mfrow=c(1,2))
+hist(escore1)
+hist(escore2)
+par (mfrow=c(1,1))
+vinhos_cpa <-cbind(escore1,escore2)
+
+```
+
+Tratamento dos dados, para melhor classificacao agrupamos os vinhos com notas abaixo de 4 como Ruim e acima de 8 como Bom.  
+Entre 4 e 8 foi removido.
+
+```{r}
+Vinhos_classificacao <- Vinhos
+Vinhos_classificacao <- subset(Vinhos_classificacao, Vinhos_classificacao$Vinho == 'WHITE')
+Vinhos_classificacao <- mutate(Vinhos_classificacao,
+                               classe = case_when(quality <= 4  ~  'Ruim',
+                                                   quality > 4 & quality < 8 ~ 'Regular',
+                                                   quality >= 8  ~  'Bom'))
+Vinhos_classificacao_bom_ruim <- subset(Vinhos_classificacao, Vinhos_classificacao$classe == 'Ruim' | Vinhos_classificacao$classe == 'Bom')
+```
+## Modelo Árvore de Classificação
+#### Treinamento do modelo de arvore de classificação utilizando esses dados
+Variavel Dependente: Classe (Bom ou Ruim).  
+Variáveis independentes selecionadas fixedacidity / volatileacidity / citricacid / residualsugar / chlorides / freesulfurdioxide / totalsulfurdioxide/ density / pH / sulphates / alcohol
+```{r}
+modelo_tree <- rpart (classe ~ fixedacidity + volatileacidity + citricacid  + residualsugar + chlorides + freesulfurdioxide + totalsulfurdioxide + density + pH + sulphates + alcohol, data=Vinhos_classificacao_bom_ruim, minsplit = 15, maxdepth=10)
+rpart.plot(modelo_tree, type=4, under=FALSE, clip.right.labs=TRUE,
+           fallen.leaves=FALSE,   digits=1, varlen=-15, faclen=20,
+           cex=0.4, tweak=1.7,
+           compress=TRUE,
+           snip=FALSE)
+```
+
+```{r}
+rpart.plot(modelo_tree, type=2, extra="auto", under=FALSE, clip.right.labs=TRUE,
+           fallen.leaves=TRUE,  digits=1, varlen=-15, faclen=20,
+           cex=0.4, tweak=2,
+           compress=TRUE,box.palette="auto",
+           snip=FALSE)
+```
+
+```{r}
+print(modelo_tree)
+```
+
+```{r}
+Qualidade.prevista.com.modelo.prob <- predict(modelo_tree, Vinhos_classificacao)
+Qualidade.prevista.com.modelo<-predict(modelo_tree,Vinhos_classificacao,type='class')
+Qualidade.matriz.de.confusao<-table (Vinhos_classificacao$classe, Qualidade.prevista.com.modelo)
+Qualidade.matriz.de.confusao
+```
+
+```{r}
+diagonal <- diag(Qualidade.matriz.de.confusao)
+perc.acerto <- sum(diagonal)/sum(Qualidade.matriz.de.confusao)
+perc.erro <- 1 - perc.acerto
+perc.erro
+perc.acerto
+```
+
+## Modelo de Regressão Linear Simples
+Variavel Dependente: Quality.  
+Variáveis independentes selecionadas fixedacidity / volatileacidity / citricacid / residualsugar / chlorides / freesulfurdioxide / totalsulfurdioxide/ density / pH / sulphates / alcohol
+```{r}
+attach(Vinhos_classificacao)
+
+modelo1 <- lm(quality ~ alcohol)
+
+modelo2 <- lm(quality ~ alcohol+freesulfurdioxide+residualsugar)
+
+modelo3 <- lm(quality ~ 
+                pH+
+                citricacid+
+                fixedacidity+
+                alcohol+
+                freesulfurdioxide+
+                residualsugar+
+                chlorides+
+                density)
+
+modelo4 <- lm(quality ~ 
+                fixedacidity+
+                volatileacidity+
+                citricacid+
+                residualsugar+
+                chlorides+
+                freesulfurdioxide+
+                totalsulfurdioxide+
+                density+
+                pH+
+                sulphates+
+                alcohol)
+```
+#### Seleção dos atributos mais significativos  
+Insere iterativamente os preditores mais contributivos até encontar o modelo em que todos os preditores são estatisticamente significativos.
+```{r}
+forward<-step(modelo4,direction="forward")
+forward
+summary(forward)
+```
+Remove iterativamente os preditores menos contributivos até encontar o modelo em que todos os preditores são estatisticamente significativos.
+```{r}
+backward<-step(modelo4,direction="backward")
+backward
+summary(backward)
+```
+Uma combinação de forward e backward para encotrar os atributos mais significativos para o modelo.
+```{r}
+stepwise<-step(modelo4,direction="both")
+stepwise
+summary(stepwise)
+```
+Modelo stepwise.
+```{r}
+modelo_stepwise <- lm(quality ~ 
+                        fixedacidity + 
+                        volatileacidity + 
+                        residualsugar + 
+                        freesulfurdioxide + 
+                        density + 
+                        pH + 
+                        sulphates + 
+                        alcohol)
+summary(modelo_stepwise)
+```
+O valor de R2 mostra quão proximo o valor estimado está do valor real, o modelo com maior R2 foi o modelo 4 e o Modelo Stepwise.  
+O modelo 4 utiliza todos os atributos disponiveis e o Modelo Stepwise utiliza apenas os atrbutos selecionados na função Stepwise.  
+Ambos tiveram um desempenho parecido.
+```{r}
+measures <- function(x) {
+  L <- list(npar = length(coef(x)),
+            dfres = df.residual(x),
+            nobs = length(fitted(x)),
+            RMSE = summary(x)$sigma,
+            R2 = summary(x)$r.squared,
+            R2adj = summary(x)$adj.r.squared,
+            PRESS = press(x),
+            logLik = logLik(x),
+            AIC = AIC(x),
+            BIC = BIC(x))
+  unlist(L)
+}
+
+modl <- list(m1 = modelo1, m2 = modelo2, m3 = modelo3, m4 = modelo4, ms = modelo_stepwise)
+round(t(sapply(modl, measures)), 3)
+```
+
+```{r}
+Val_pred <- predict(modelo_stepwise,interval = "prediction", level = 0.95) 
+fix(Val_pred)
+```
+Intervalo de confianca - grafico para media.
+```{r}
+fit <- Val_pred[,1] # valores preditos
+lower <- Val_pred[,2] # limite inferior
+upper <- Val_pred[,3] # limite superior
+
+mse_2 <- sqrt(mean((quality - fit)^2))
+erro_usando_media_2 <- sqrt(mean((quality - mean(quality))^2))
+
+```
+Grafico residuo.
+```{r}
+rs <- resid(modelo_stepwise)
+plot(predict(modelo_stepwise), rs, xlab = "Preditor linear",ylab = "Residuos")
+abline(h = 0, lty = 2)
+```
+
+```{r}
+Vinhos_classificacao_Final<-cbind(Vinhos_classificacao,Val_pred)
+fix(Vinhos_classificacao_Final)
+```
+## Árvore de Regressão
+Variavel Dependente: Quality.  
+Variáveis independentes selecionadas fixedacidity / volatileacidity / citricacid / residualsugar / chlorides / freesulfurdioxide / totalsulfurdioxide/ density / pH / sulphates / alcohol
+```{r}
+modelo_Valor_tree <- rpart (quality ~ 
+                                      pH+
+                                      citricacid+
+                                      fixedacidity+
+                                      alcohol+
+                                      freesulfurdioxide+
+                                      residualsugar+
+                                      chlorides+
+                                      density, 
+                                    data=Vinhos_classificacao, 
+                                    cp = 0.001,minsplit = 150,maxdepth=5)
+```
+
+```{r}
+rpart.plot(modelo_Valor_tree, type=4, extra=1, under=FALSE, clip.right.labs=TRUE,
+           fallen.leaves=FALSE,   digits=2, varlen=-10, faclen=20,
+           cex=0.4, tweak=1.7,
+           compress=TRUE,
+           snip=FALSE)
+```
+
+```{r}
+Val_pred_tree <- predict(modelo_Valor_tree,interval = "prediction", level = 0.95) 
+```
+
+```{r}
+mse_tree <- mean((Vinhos_classificacao$quality - Val_pred_tree)^2)
+sqrt(mse_tree)
+
+erro_usando_media <- mean((Vinhos_classificacao$quality - mean(Vinhos_classificacao$quality))^2)
+sqrt(erro_usando_media)
+```
+Grafico Residuo
+```{r}
+rs <- Val_pred_tree - Vinhos_classificacao$quality
+plot(Val_pred_tree, rs, xlab = "Com Árvore de Regressão",ylab = "Residuos")
+abline(h = 0, lty = 2)
+```
+## Regressão logistica
+Variavel dependente: VinhoBom 0 ou 1 (1= nota maior que 8).  
+Variaveis independentes: fixedacidity / volatileacidity / citricacid / residualsugar / chlorides / freesulfurdioxide / totalsulfurdioxide/ density / pH / sulphates / alcohol  
+
+
+#### Inserindo uma variavel binaria
+```{r}
+Vinhos_classificacao_regressao_logistica <- Vinhos_classificacao
+Vinhos_classificacao_regressao_logistica <- mutate(Vinhos_classificacao_regressao_logistica,
+                                            vinhoBom = case_when(quality <= 4  ~  0,
+                                                                 quality > 4 & quality < 8 ~ 2,
+                                                                 quality >= 8  ~  1))
+Vinhos_classificacao_regressao_logistica  <- subset(Vinhos_classificacao_regressao_logistica, 
+                                                    Vinhos_classificacao_regressao_logistica$vinhoBom == 0 | 
+                                                    Vinhos_classificacao_regressao_logistica$vinhoBom == 1)
+```                                                    
+#### Gerando o modelo de regressao logistica
+```{r}
+modelo_log<- glm(vinhoBom ~ 
+                   fixedacidity + 
+                   volatileacidity + 
+                   residualsugar + 
+                   freesulfurdioxide + 
+                   density + 
+                   pH + 
+                   sulphates + 
+                   alcohol, Vinhos_classificacao_regressao_logistica, family=binomial(link = "logit"))
+
+summary(Vinhos_classificacao_regressao_logistica) 
+summary(modelo_log)
+predito<-fitted(modelo_log) 
+summary(predito)
+```
+
+#### Matriz de confusão  
+Valor de acuracia:
+
+```{r}
+# montar a matriz de confusão  
+Vinhos_classificacao_regressao_logistica$fx_predito <- cut(predito, breaks=c(0,0.50,1), right=F)
+
+MC <- table(Vinhos_classificacao_regressao_logistica$vinhoBom, Vinhos_classificacao_regressao_logistica$fx_predito , deparse.level = 2)
+show(MC) # mostra os resultados  
+```
+
+```{r}
+ACC = sum(diag(MC))/sum(MC) # calcula a acurácia  
+show(ACC) # mostra a acurácia 
+AcuraciaRegressaoLogistica = ACC
+```
+
+#### Comparação entre os modelos
+Avaliando os cálculos de R2 e acurácia verificamos o bom desempenho dos modelos sendo a váriavel dependente contínua (notas) ou discretas (Bom ou Ruim). Os dados receberam um tratamento prévio permitindo bom desempenho tanto para os modelos Discriminativos como os modelos de Regressão.
+
